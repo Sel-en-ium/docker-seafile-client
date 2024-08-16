@@ -7,7 +7,7 @@ services:
         # otherwise it will take docker forever to find the Dockerfile (or something).
         # context should point to the folder that contains the Dockerfile and start.sh.
         context: ./docker-seafile-client
-    image: seafile-client
+    image: seafile-client:9.0.7
     container_name: seafile-client
     environment:
       - LIBRARY_ID=<your-library-id-here>
@@ -18,3 +18,13 @@ services:
     volumes:
       - <library-host-volume-path>:/libraries
       - <sync-state-host-volume-path>:/seafile-state
+    # Needed for mounting fuse filesystem (https://github.com/docker/docker/issues/16233)
+    cap_add:
+      - SYS_ADMIN
+      - MKNOD
+    devices:
+      - /dev/fuse:/dev/fuse
+    security_opt:
+      - apparmor:unconfined
+      # for strace, https://github.com/docker/docker/issues/7276#issuecomment-194137403
+      - seccomp:unconfined

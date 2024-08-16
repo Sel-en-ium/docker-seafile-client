@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# WIP - start.sh might not work as it uses a lower permission user (seafile).
+# Might need to run as root to work with fuse.  Testing stuff with start-fuse.sh.
+# ALSO, looks like the sync command should only be run once on the lib initially
+# (or maybe there is some option under sync -h).
+
 set -e
 set -u
 set -o pipefail

@@ -1,11 +1,16 @@
-FROM debian:bullseye-slim
+FROM ubuntu:24.04
 
-RUN apt-get update && apt-get install procps grep curl -y
-RUN curl https://linux-clients.seafile.com/seafile.asc -o /usr/share/keyrings/seafile-keyring.asc
-RUN echo deb [arch=amd64 signed-by=/usr/share/keyrings/seafile-keyring.asc] https://linux-clients.seafile.com/seafile-deb/bullseye/ stable main | tee /etc/apt/sources.list.d/seafile.list
-RUN apt-get update -y
-RUN apt-get install -y seafile-cli
-RUN rm -rf /var/lib/apt/lists/*
+# get curl, add-apt-repository
+RUN apt-get update
+RUN apt-get install -y curl
+RUN apt-get install -y software-properties-common
+# install FUSE https://github.com/AppImage/AppImageKit/wiki/FUSE
+RUN add-apt-repository universe
+RUN apt-get install -y libfuse2t64
+# Install seaf-cli
+RUN curl https://s3.eu-central-1.amazonaws.com/download.seadrive.org/Seafile-cli-x86_64-9.0.7.AppImage -o /seaf-cli
+RUN chmod +x seaf-cli
+RUN mv /seaf-cli /usr/local/bin/seaf-cli
 RUN apt-get clean
 
 RUN mkdir /seafile-state
