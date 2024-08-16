@@ -4,7 +4,7 @@ set -e
 set -u
 set -o pipefail
 
-DATA_DIR="${DATA_DIR:-/data}"
+LIBRARY_DIR="/libraries"
 SEAFILE_UID="${SEAFILE_UID:-1000}"
 SEAFILE_GID="${SEAFILE_GID:-1000}"
 SEAFILE_UMASK="${SEAFILE_UMASK:-022}"
@@ -47,10 +47,10 @@ get () {
 }
 
 setup_lib_sync(){
-    if [ ! -d $DATA_DIR ]; then
-      echo "Using new data directory: $DATA_DIR"
-      mkdir -p $DATA_DIR
-      chown seafile:seafile -R $DATA_DIR
+    if [ ! -d $LIBRARY_DIR ]; then
+      echo "Using new data directory: $LIBRARY_DIR"
+      mkdir -p $LIBRARY_DIR
+      chown seafile:seafile -R $LIBRARY_DIR
     fi
     TOKEN_JSON=$(curl -d "username=$USERNAME" -d "password=$PASSWORD" ${SERVER_URL}:${SERVER_PORT}/api2/auth-token/ 2> /dev/null)
     TOKEN=$(get token "$TOKEN_JSON")
@@ -66,7 +66,7 @@ setup_lib_sync(){
       LIB_JSON=$(curl -G -H "Authorization: Token $TOKEN" -H 'Accept: application/json; indent=4' ${SERVER_URL}:${SERVER_PORT}/api2/repos/${LIB}/ 2> /dev/null)
       LIB_NAME=$(get name "$LIB_JSON")
       LIB_NAME_NO_SPACE=$(echo $LIB_NAME|sed 's/[ \(\)]/_/g')
-      LIB_DIR=${DATA_DIR}/${LIB_NAME_NO_SPACE}
+      LIB_DIR=${LIBRARY_DIR}/${LIB_NAME_NO_SPACE}
       set +e
       LIB_IN_SYNC=$(echo "$LIBS_IN_SYNC" | grep "$LIB")
       set -e
