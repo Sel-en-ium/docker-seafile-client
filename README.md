@@ -4,6 +4,7 @@ Run a seafile client inside docker which can sync files from seafile repositorie
 See docker-compose how to use.
 
 ## Environment variables:
+ - context=./docker-seafile-client   The path to the directory containing `Dockerfile` and `start.sh`
  - LIBRARY_ID=your-library-id-here   Can be multiple library ids seperated with colon :
  - SERVER_URL=server-url             The url used to access your server, eg: https://example.seafile.com
  - SERVER_PORT=server-port           Which port the server is hosted on: usually 443 (https) or 80 (http)
