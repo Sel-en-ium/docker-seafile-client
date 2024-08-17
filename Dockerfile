@@ -8,14 +8,16 @@ RUN apt-get install -y seafile-cli
 RUN rm -rf /var/lib/apt/lists/*
 RUN apt-get clean
 
-WORKDIR /seafile-client
+RUN mkdir /seafile-state
+RUN mkdir /home/seafile
 
-COPY start.sh /seafile-client/start.sh
+WORKDIR /home/seafile
 
-RUN chmod +x /seafile-client/start.sh
-RUN useradd -U -d /seafile-client -s /bin/bash seafile
+COPY start.sh /home/seafile/start.sh
+RUN chmod +x /home/seafile/start.sh
+
+RUN useradd -U -d /home/seafile -s /bin/bash seafile
 RUN usermod -G users seafile
-RUN chown seafile:seafile -R /seafile-client
-RUN su - seafile -c "seaf-cli init -d /seafile-client"
+RUN chown seafile:seafile -R /home/seafile
 
 CMD ["./start.sh"]

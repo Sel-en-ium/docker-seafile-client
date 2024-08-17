@@ -17,4 +17,4 @@ services:
       - PASSWORD=<password>
     volumes:
       - <library-host-volume-path>:/libraries
-      - <sync-state-host-volume-path>:/seafile-client
+      - <sync-state-host-volume-path>:/seafile-state

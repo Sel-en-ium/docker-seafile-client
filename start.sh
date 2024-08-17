@@ -3,6 +3,7 @@
 set -e
 set -u
 set -o pipefail
+# set -x
 
 LIBRARY_DIR="/libraries"
 SEAFILE_UID="${SEAFILE_UID:-1000}"
@@ -11,20 +12,28 @@ SEAFILE_UMASK="${SEAFILE_UMASK:-022}"
 CONNECT_RETRIES="${CONNECT_RETRIES:-5}"
 DISABLE_VERIFY_CERTIFICATE="${DISABLE_VERIFY_CERTIFICATE:-false}"
 
+STATE_DIR="/seafile-state"
+# Used with every seaf-cli command to ensure it is using the correct configuration file
+C="-c ${STATE_DIR}/conf"
+# Must own the settings/state/conf directory
+chown seafile:seafile -R /seafile-state
+
 start_seafile(){
   retries="${CONNECT_RETRIES}"
   count=0
   set +e
-  su - seafile -c "seaf-cli start"
-  su - seafile -c "seaf-cli config -k disable_verify_certificate -v $DISABLE_VERIFY_CERTIFICATE"
+  # Ensure seaf-cli is initialized (if already exists, it's fine)
+  su - seafile -c "seaf-cli init ${C} -d $STATE_DIR"
+  su - seafile -c "seaf-cli start ${C}"
+  su - seafile -c "seaf-cli config ${C} -k disable_verify_certificate -v $DISABLE_VERIFY_CERTIFICATE"
   while :
   do
-    su - seafile -c "seaf-cli status"
+    su - seafile -c "seaf-cli status ${C}"
     exit=$?
     wait=$((2 ** $count))
     count=$(($count + 1))
     if [ $exit -eq 0 ]; then
-      echo "exiting"
+      echo "sart_seafile success"
       return 0
     fi
     if [ $count -lt $retries ]; then
@@ -58,7 +67,7 @@ setup_lib_sync(){
       echo "Unable to get token. Check your user credentials, server url and server port."
       return
     fi
-    LIBS_IN_SYNC=$(su - seafile -c 'seaf-cli list')
+    LIBS_IN_SYNC=$(su - seafile -c "seaf-cli list ${C}")
     LIBS=(${LIBRARY_ID//:/ })
     for i in "${!LIBS[@]}"
     do
@@ -74,7 +83,7 @@ setup_lib_sync(){
         echo "Syncing $LIB_NAME"
         mkdir -p $LIB_DIR
         chown seafile:seafile -R $LIB_DIR
-        su - seafile -c "seaf-cli sync -l \"\"$LIB\"\" -s \"${SERVER_URL}:${SERVER_PORT}\" -d \"$LIB_DIR\" -u \"$USERNAME\" -p \"$PASSWORD\""
+        su - seafile -c "seaf-cli sync ${C} -l \"\"$LIB\"\" -s \"${SERVER_URL}:${SERVER_PORT}\" -d \"$LIB_DIR\" -u \"$USERNAME\" -p \"$PASSWORD\""
       fi
     done
 }
@@ -109,7 +118,7 @@ keep_in_foreground() {
       sleep 1
     done
     date +"%Y-%m-%d %H:%M:%S"
-    su - seafile -c "seaf-cli status"
+    su - seafile -c "seaf-cli status ${C}"
     sleep 60
   done
 }
