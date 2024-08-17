@@ -112,7 +112,7 @@ keep_in_foreground() {
   # leading to a script abortion thanks to "set -e".
   while true
   do
-    for SEAFILE_PROC in "ccnet" "seaf-daemon"
+    for SEAFILE_PROC in "seaf-daemon"
     do
       pkill -0 -f "${SEAFILE_PROC}"
       sleep 1
